@@ -1,0 +1,125 @@
+from PIL import Image, ImageOps
+import numpy as np
+from PIL import ImageChops
+import matplotlib.pyplot as plt
+
+#ZAD 1
+
+im = Image.open('im1.jpg')
+print("tryb", im.mode)
+print("format", im.format)
+print("rozmiar", im.size)
+h, w = im.size
+im.show()
+
+#ZAD 2 wszystkie podpunkty
+
+# tablica obrazu
+T = np.array(im)
+#tablica kanału r
+t_r = T[:, :, 0]
+im_r = Image.fromarray(t_r) # obraz w odcieniuach szarości kanału r
+print("tryb", im_r.mode)
+#tablica kanału g
+t_g = T[:, :, 1]
+im_g = Image.fromarray(t_g) # obraz w odcieniuach szarości kanału g
+print("tryb", im_g.mode)
+#tablica kanału b
+t_b = T[:, :, 2]
+im_b = Image.fromarray(t_b) # obraz w odcieniuach szarości kanału b
+print("tryb", im_b.mode)
+
+# Kanały pobrane jako obrazy
+r, g, b = im.split()  # powstają obrazy
+print("tryb", r.mode)
+print("tryb", g.mode)
+print("tryb", b.mode)
+diff_r = ImageChops.difference(r, im_r)
+diff_g = ImageChops.difference(g, im_g)
+diff_b = ImageChops.difference(b, im_b)
+
+
+# plt.figure(figsize=(32, 16))
+# plt.imshow(im_r, "gray")
+# plt.savefig('im_r.png')
+# plt.show()
+# plt.figure(figsize=(32, 16))
+# plt.imshow(im_g, "gray")
+# plt.savefig('im_g.png')
+# plt.show()
+# plt.figure(figsize=(32, 16))
+# plt.imshow(im_b, "gray")
+# plt.savefig('im_b.png')
+# plt.show()
+
+im1 = Image.merge('RGB', (im_r, im_g, im_b))
+im2 = Image.merge('RGB', (r, g, b))
+#im1.show()
+#im2.show()
+diff_im = ImageChops.difference(im1,im2)
+#diff_im.show()
+
+im1 = Image.merge('RGB', (im_r, im_g, im_b))
+im3 = Image.merge('RGB', (g, g, b))
+im3.save("im3.jpg")
+im3.save("im3.png")
+#im1.show()
+#im3.show()
+diff_im = ImageChops.difference(im1,im3)
+#diff_im.show()
+
+r_T = np.array(r)
+g_T = np.array(g)
+b_T = np.array(b)
+
+print("--------porównanie tablic--------------")
+porownanie = r_T == t_r
+czy_rowne = porownanie.all()
+print(czy_rowne)
+print("----------------------")
+
+def rysuj_ramke(w, h, dzielnik):
+    t = (h, w)
+    tab = np.zeros(t, dtype=np.uint8)
+    grub = int(min(w, h) / dzielnik)
+    ilosc = int(min(w, h) / grub)
+    for j in range(ilosc + 1):
+        if j % 2 == 0:
+            n = h - j*grub
+            p = w - j*grub
+            tab[j*grub:n, j*grub:p] = 1
+        else:
+            n = h - j*grub
+            p = w - j*grub
+            tab[j * grub:n, j * grub:p] = 0
+    return tab * 255
+
+ramka = rysuj_ramke(1200, 900, 8)
+ramka1 = Image.fromarray(ramka)
+ramka1.save("ramkanaprzemian.bmp")
+
+ramka_im = Image.fromarray(ramka)
+im4 = Image.merge('RGB', (ramka_im, g, b))
+#im4.show()
+
+ramka_im = Image.fromarray(ramka)
+im4a = Image.merge('RGB', (r, g, ramka_im,))
+#im4a.show()
+
+ramka_im = Image.fromarray(ramka)
+im4b = Image.merge('RGB', (r, ramka_im, b))
+#im4b.show()
+
+plt.figure(figsize=(32, 16))
+plt.subplot(2,2,1)
+plt.imshow(im4)
+plt.axis('off')
+plt.subplot(2,2,2)
+plt.imshow(im4a, "gray")
+plt.axis('off')
+plt.subplot(2,2,3)
+plt.imshow(im4b, "gray")
+plt.axis('off')
+plt.subplots_adjust(wspace=0.05, hspace=0.05)
+plt.savefig('fig2.png')
+plt.show()
